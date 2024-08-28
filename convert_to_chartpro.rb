@@ -106,7 +106,7 @@ def section_to_chordpro(section)
   converted_section.compact
 end
 
-CHORD_REGEXP = /(?<=[\s\.])\S+/
+CHORD_REGEXP = /(?<=[\s\.])[a-zA-Z0-9#]+/
 
 def interpolate_chord_with_line(chords_line, lyrics)
   return lyrics if chords_line.nil?
