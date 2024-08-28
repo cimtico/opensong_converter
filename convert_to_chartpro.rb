@@ -54,7 +54,7 @@ def convert_to_chordpro(song)
   sections = chordpro_sections(song)
   # Ordered sections according to presentation
   ordered_sections = song.presentation.map do |section|
-    "{comment: #{section}}\n" +
+    "{comment: #{section_to_human(section)}}\n" +
     sections[section].join("\n")
   rescue => ex
     byebug
@@ -70,7 +70,7 @@ def convert_to_chordpro(song)
   {tempo: #{song.tempo}}
   {time: #{song.time}}
   {key: #{song.key}}
-  {flow: #{song.presentation.join(" ")}}
+  {flow: #{song.presentation.map { section_to_human(_1) }.join(" ")}}
   
   {comment: #{song.link_youtube}}
   {comment: #{song.link_web}}
@@ -133,6 +133,63 @@ def chords_to_chordpro(chords_line)
   chord_queue.map{"[#{_1}]"}.join(" ")
 end
 
+def convert_to_txt(song)
+  sections = txt_sections(song)
+  # Ordered sections according to presentation
+  ordered_sections = song.presentation.map do |section|
+    "#{section_to_human(section)}\n\n" +
+    sections[section].join("\n")
+  end
+  <<~EOS
+  title: #{song.title}
+  artist: #{song.author}
+  tempo: #{song.tempo}
+  time: #{song.time}
+  key: #{song.key}
+  flow: #{song.presentation.map { section_to_human(_1) }.join(" ")}
+  
+  #{song.link_youtube}
+  #{song.link_web}
+
+  #{ordered_sections.join("\n\n")}
+  EOS
+end
+
+def txt_sections(song)
+  song.opensong.each_with_object({}) do |(name, content), acc|
+    acc[name] = section_to_txt(content)
+  end
+end
+
+def section_to_txt(section)
+  converted_section = section.each_with_object([]) do |line_item, acc|
+    case line_item[:type]
+    when :lyric
+      acc << line_item[:line]
+    when :chords
+      acc << line_item[:line]
+    when :comment
+      acc << "##{line_item[:line]}"
+    else
+      raise "Invalid line item"
+    end
+  end
+  converted_section.compact
+end
+
+def section_to_human(section)
+  if section =~ /\AC(\d+|\s+|\z)/
+    section.gsub("C", "CORO")
+  elsif section =~ /\AB(\d+|\s+|\z)/
+    section.gsub("B", "PUENTE")
+  elsif section =~ /\AP(\d+|\s+|\z)/
+    section.gsub("P", "PRE-CORO")
+  elsif section =~ /\AV(\d+|\s+|\z)/
+    section.gsub("V", "VERSO")
+  else
+    section
+  end
+end
 
 def convert_song_file_to_formats(song_file, verbose: false, formats: [:txt, :chordpro])
   song = song_data(song_file)
@@ -167,50 +224,6 @@ def convert_path_to_formats(path, verbose: false, formats: [:txt, :chordpro])
   else
     raise "Invalid path provided"
   end
-end
-
-def convert_to_txt(song)
-  sections = txt_sections(song)
-  # Ordered sections according to presentation
-  ordered_sections = song.presentation.map do |section|
-    "#{section}\n\n" +
-    sections[section].join("\n")
-  end
-  <<~EOS
-  title: #{song.title}
-  artist: #{song.author}
-  tempo: #{song.tempo}
-  time: #{song.time}
-  key: #{song.key}
-  flow: #{song.presentation.join(" ")}
-  
-  #{song.link_youtube}
-  #{song.link_web}
-
-  #{ordered_sections.join("\n\n")}
-  EOS
-end
-
-def txt_sections(song)
-  song.opensong.each_with_object({}) do |(name, content), acc|
-    acc[name] = section_to_txt(content)
-  end
-end
-
-def section_to_txt(section)
-  converted_section = section.each_with_object([]) do |line_item, acc|
-    case line_item[:type]
-    when :lyric
-      acc << line_item[:line]
-    when :chords
-      acc << line_item[:line]
-    when :comment
-      acc << "##{line_item[:line]}"
-    else
-      raise "Invalid line item"
-    end
-  end
-  converted_section.compact
 end
 
 path = ARGV[0] || "tmp/"
