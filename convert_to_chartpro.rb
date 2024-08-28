@@ -75,7 +75,7 @@ def convert_to_chordpro(song)
   {comment: #{song.link_youtube}}
   {comment: #{song.link_web}}
 
-  #{ordered_sections.join("\n")}
+  #{ordered_sections.join("\n\n")}
   EOS
 end
 
