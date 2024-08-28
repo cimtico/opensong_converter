@@ -23,7 +23,7 @@ def song_data(song_file)
     author: doc.at_xpath('//author').content,
     presentation: doc.at_xpath('//presentation').content.upcase.split(/\s+/),
     tempo: doc.at_xpath('//tempo').content,
-    time_sig: doc.at_xpath('//time_sig').content,
+    time: doc.at_xpath('//time_sig').content,
     key: doc.at_xpath('//key').content,
     link_youtube: doc.at_xpath('//link_youtube')&.content,
     link_web: doc.at_xpath('//link_web')&.content,
