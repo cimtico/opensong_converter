@@ -1,6 +1,6 @@
 Convert opensong files to chord pro format.
 
-Place your opensong files in the `tmp` directory and run 
+Create a `tmp` directory within the cloned code and place your opensong files in that `tmp` directory, and run 
 ```
 ./convert_to_chartpro.rb
 ```
