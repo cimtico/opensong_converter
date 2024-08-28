@@ -1,0 +1,7 @@
+.bundle
+.direnv
+.nix-gems
+/tmp
+/vendor
+
+.byebug_history
