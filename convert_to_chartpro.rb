@@ -169,7 +169,7 @@ def section_to_txt(section)
     when :chords
       acc << line_item[:line]
     when :comment
-      acc << "##{line_item[:line]}"
+      acc << "**#{line_item[:line].gsub(/\A\s*/, "")}**"
     else
       raise "Invalid line item"
     end
@@ -191,6 +191,17 @@ def section_to_human(section)
   end
 end
 
+def detect_tabs(song_data)
+  song_data.opensong.each do |section, content|
+    content.each do |line_item|
+      if line_item[:line] =~ /\t/
+        puts "TAB DETECTED: #{section} - #{line_item[:line]}"
+      end
+    end
+  end
+  false
+end
+
 def convert_song_file_to_formats(song_file, verbose: false, formats: [:txt, :chordpro])
   song = song_data(song_file)
   if formats.include? :chordpro
@@ -209,15 +220,19 @@ def convert_song_file_to_formats(song_file, verbose: false, formats: [:txt, :cho
     end
     File.write("#{song_file}.txt", txt)
   end
+  detect_tabs(song)
 end
 
 def convert_path_to_formats(path, verbose: false, formats: [:txt, :chordpro])
   if File.directory?(path)
+    counter = 0
     Dir.entries(path).each do |file|
       next if file =~ /\A\./ || file =~ /.+\.(chopro|txt)/
       puts "CONVERTING: #{file}"
       convert_song_file_to_formats(File.join(path, file), verbose:, formats:)  
+      counter += 1
     end
+    puts "CONVERTED #{counter} songs"
   elsif File.file?(path)
     puts "CONVERTING: #{path}"
     convert_song_file_to_formats(path, verbose:, formats:)
