@@ -410,7 +410,7 @@ def chords_with_index(chords_line)
 
   chords = chords_line[:line]
 
-  chords.scan(CHORD_REGEXP).map{ |chord| [chord, $~.offset(0)[0]] }
+  chords.enum_for(:scan, CHORD_REGEXP).map { |chord| [chord, Regexp.last_match.begin(0)] }
 end
 
 ##################################################################
