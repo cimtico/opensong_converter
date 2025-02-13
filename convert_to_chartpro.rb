@@ -81,7 +81,7 @@ def convert_to_chordpro(song)
   {comment: #{song.link_youtube}}
   {comment: #{song.link_web}}
 
-  #{ordered_sections.join("\n\n")}
+  #{ordered_sections.join("\n\n").gsub(/_/, "")}
   EOS
 end
 
@@ -268,7 +268,7 @@ def convert_to_freeshow(song)
   freeshow_structure = {
     name: song[:title],
     private: false,
-    category: "opensong",
+    category: "song",
     settings: {
       activeLayout: layout_id,
       template: "default"
@@ -351,12 +351,14 @@ def generate_color(index)
   colors[index % colors.length]
 end
 
+CHORD_ONLY_LINE_TEXT = "                                                   \n".freeze
+
 def slide_line_item(line, chords)
   {
     align: "",
     text: [
       {
-        value: line,
+        value: line.match?(/\A\s*\z/) ? CHORD_ONLY_LINE_TEXT : line.gsub(/_/, ""),
         style: "font-size: 100px;"
       }
     ],
@@ -396,13 +398,16 @@ def generate_slide_items(section_data)
 end
 
 def chords_to_freeshow(chords_line)
-  chords_with_index(chords_line).map do |(chord, index)|
-    {
-      id: generate_uid,
-      pos: index,
-      key: chord
-    }
-  end
+  return []
+
+  # Not sending chords for now
+  # chords_with_index(chords_line).map do |(chord, index)|
+  #   {
+  #     id: generate_uid,
+  #     pos: index,
+  #     key: chord
+  #   }
+  # end
 end
 
 def chords_with_index(chords_line)
